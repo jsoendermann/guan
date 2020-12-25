@@ -12,5 +12,6 @@
 
 ## commands
 
-deploy --workdir --pipeline --pretty
-run-stage
+- deploy --workdir --pipeline --pretty
+- run-stage
+- show-dependencies
