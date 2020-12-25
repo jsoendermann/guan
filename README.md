@@ -5,7 +5,7 @@
 - dependencies and parallel executions for stages
 - env vars
 - multi command stages
-- nicer console output
+- nicer console output https://docs.rs/indicatif/0.15.0/indicatif/
 - executing individual stages
 - logfiles
 - runtime estimates
