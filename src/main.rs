@@ -1,56 +1,46 @@
-use serde::{Deserialize, Serialize};
-use std::error::Error;
-use std::fs::File;
-use std::io::BufReader;
-use std::path::Path;
-use std::process::Command;
+mod commands;
+mod pipeline;
 
-#[derive(Serialize, Deserialize, Debug)]
-struct Stage {
-    name: String,
-    run: String,
-}
+use clap::{App, Arg, SubCommand};
 
-#[derive(Serialize, Deserialize, Debug)]
-struct Pipeline {
-    name: String,
-    stages: Vec<Stage>,
-}
+use commands::command::GuanCommand;
+use commands::deploy::{DeployArgs, DeployCommand};
 
 fn main() {
-    let pipeline = read_pipeline_from_file("pipeline.yml").expect("Can't read pipeline");
-    println!("Deploying {}", pipeline.name);
+    let matches = App::new("Guan")
+        .version("1.0")
+        .author("Jan Soendermann")
+        .about("Pipelines for your personal projects.")
+        .subcommand(
+            SubCommand::with_name("deploy")
+                .about("Deploy your code by executing a pipeline.")
+                .arg(
+                    Arg::with_name("pipeline_file_path")
+                        .short("p")
+                        .long("pipeline")
+                        .default_value("pipeline.yml")
+                        .help("The file containing the pipeline definition."),
+                )
+                .arg(
+                    Arg::with_name("workdir")
+                        .short("d")
+                        .long("workdir")
+                        .default_value(".")
+                        .help("The directory in which the pipeline commands are run."),
+                ),
+        )
+        .get_matches();
 
-    for stage in pipeline.stages.iter() {
-        match execute_stage(stage) {
-            Err(stderr) => {
-                println!("Something went wrong. Stderr:\n\n{}", stderr);
-                break;
-            }
-            _ => (),
-        }
-    }
-}
+    let command = if let Some(deploy) = matches.subcommand_matches("deploy") {
+        let args = DeployArgs {
+            pipeline_file_path: deploy.value_of("pipeline_file_path").unwrap().to_string(),
+            workdir: deploy.value_of("workdir").unwrap().to_string(),
+        };
 
-fn read_pipeline_from_file<P: AsRef<Path>>(path: P) -> Result<Pipeline, Box<dyn Error>> {
-    let file = File::open(path)?;
-    let reader = BufReader::new(file);
-    let p = serde_yaml::from_reader(reader)?;
-    Ok(p)
-}
-
-fn execute_stage(stage: &Stage) -> Result<(), String> {
-    println!("Running {}", stage.name);
-    let output = Command::new("bash")
-        .arg("-c")
-        .arg(&stage.run)
-        .output()
-        .expect("Error running command");
-
-    if output.status.success() {
-        Ok(())
+        DeployCommand::new(args)
     } else {
-        let stderr = String::from_utf8(output.stderr).expect("Error reading stderr");
-        Err(stderr)
-    }
+        panic!("No subcommand selected");
+    };
+
+    command.execute().unwrap();
 }

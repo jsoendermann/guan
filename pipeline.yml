@@ -1,5 +1,11 @@
 version: '1.0'
 name: My pipeline
 stages:
-  - name: Echo
-    run: echo hello world
+  - id: print
+    name: Print file
+    depends_on: []
+    run: cat pipeline.yml
+  - id: failure
+    name: Big fail
+    depends_on: ['echo']
+    run: ">&2 echo 'error' && bash -c 'exit 1'"
