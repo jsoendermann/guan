@@ -1,7 +1,5 @@
 use super::command::GuanCommand;
-use crate::pipeline::{Pipeline, Stage};
-
-use std::process::Command;
+use crate::pipeline::Pipeline;
 
 pub struct DeployArgs {
   pub pipeline_file_path: String,
@@ -24,34 +22,18 @@ impl GuanCommand for DeployCommand {
       .expect("Can't open pipeline definition file");
 
     for stage in pipeline.stages.iter() {
-      match self.execute_stage(stage) {
+      println!("Running {}", stage.name);
+      match stage.run(&self.args.workdir) {
         Err(stderr) => {
           println!("Something went wrong. Stderr:\n\n{}", stderr);
           break;
         }
-        _ => (),
+        _ => {
+          println!("Done!");
+        }
       }
     }
 
     Ok(())
-  }
-}
-
-impl DeployCommand {
-  fn execute_stage(&self, stage: &Stage) -> Result<(), String> {
-    println!("Running {}", stage.name);
-    let output = Command::new("bash")
-      .arg("-c")
-      .arg(&stage.run)
-      .current_dir(&self.args.workdir)
-      .output()
-      .expect("Error running command");
-
-    if output.status.success() {
-      Ok(())
-    } else {
-      let stderr = String::from_utf8(output.stderr).expect("Error reading stderr");
-      Err(stderr)
-    }
   }
 }
