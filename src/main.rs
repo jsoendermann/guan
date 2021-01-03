@@ -5,6 +5,7 @@ use clap::{App, Arg, SubCommand};
 
 use commands::command::GuanCommand;
 use commands::deploy::{DeployArgs, DeployCommand};
+use commands::ls_stages::{LsStagesArgs, LsStagesCommand};
 use commands::run_stage::{RunStageArgs, RunStageCommand};
 
 fn main() {
@@ -39,8 +40,14 @@ fn main() {
                         .help("The id of the stage to be executed."),
                 ),
         )
+        .subcommand(
+            SubCommand::with_name("ls-stages")
+                .about("List all stages of your pipeline.")
+                .arg(&pipeline_file_path_arg),
+        )
         .get_matches();
 
+    // let command: Box<dyn GuanCommand<Args = () >> =
     if let Some(deploy) = matches.subcommand_matches("deploy") {
         let pipeline_file_path = deploy.value_of("pipeline_file_path").unwrap().to_string();
         let workdir = deploy.value_of("workdir").unwrap().to_string();
@@ -49,11 +56,15 @@ fn main() {
             workdir,
         };
 
+        // Box::new(DeployCommand::new(args))
         DeployCommand::new(args).execute().unwrap();
-    } else if let Some(deploy) = matches.subcommand_matches("run-stage") {
-        let stage_name = deploy.value_of("stage_name").unwrap().to_string();
-        let pipeline_file_path = deploy.value_of("pipeline_file_path").unwrap().to_string();
-        let workdir = deploy.value_of("workdir").unwrap().to_string();
+    } else if let Some(run_stage) = matches.subcommand_matches("run-stage") {
+        let stage_name = run_stage.value_of("stage_name").unwrap().to_string();
+        let pipeline_file_path = run_stage
+            .value_of("pipeline_file_path")
+            .unwrap()
+            .to_string();
+        let workdir = run_stage.value_of("workdir").unwrap().to_string();
 
         let args = RunStageArgs {
             stage_name,
@@ -61,7 +72,14 @@ fn main() {
             workdir,
         };
 
+        // Box::new(RunStageCommand::new(args))
         RunStageCommand::new(args).execute().unwrap();
+    } else if let Some(ls_stage) = matches.subcommand_matches("ls-stages") {
+        let pipeline_file_path = ls_stage.value_of("pipeline_file_path").unwrap().to_string();
+
+        let args = LsStagesArgs { pipeline_file_path };
+
+        LsStagesCommand::new(args).execute().unwrap();
     } else {
         panic!("No subcommand selected");
     };
