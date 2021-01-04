@@ -1,3 +1,5 @@
+use std::error::Error;
+
 use super::command::GuanCommand;
 use crate::pipeline::Pipeline;
 
@@ -18,9 +20,8 @@ impl GuanCommand for RunStageCommand {
     RunStageCommand { args }
   }
 
-  fn execute(&self) -> Result<(), String> {
-    let pipeline = Pipeline::from_file(&self.args.pipeline_file_path)
-      .expect("Can't open pipeline definition file");
+  fn execute(&self) -> Result<(), Box<dyn Error>> {
+    let pipeline = Pipeline::from_file(&self.args.pipeline_file_path)?;
 
     let stage = pipeline
       .stages
@@ -36,7 +37,7 @@ impl GuanCommand for RunStageCommand {
       }
       Err(error) => {
         println!("Something went wrong\n\n{}", error);
-        Err(error)
+        Err(error.into())
       }
     }
   }

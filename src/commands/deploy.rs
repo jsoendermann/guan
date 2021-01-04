@@ -1,3 +1,5 @@
+use std::error::Error;
+
 use super::command::GuanCommand;
 use crate::pipeline::Pipeline;
 
@@ -17,9 +19,8 @@ impl GuanCommand for DeployCommand {
     DeployCommand { args }
   }
 
-  fn execute(&self) -> Result<(), String> {
-    let pipeline = Pipeline::from_file(&self.args.pipeline_file_path)
-      .expect("Can't open pipeline definition file");
+  fn execute(&self) -> Result<(), Box<dyn Error>> {
+    let pipeline = Pipeline::from_file(&self.args.pipeline_file_path)?;
 
     for stage in pipeline.stages.iter() {
       println!("Running {}", stage.name);
