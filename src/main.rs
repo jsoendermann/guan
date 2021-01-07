@@ -47,8 +47,7 @@ fn main() {
         )
         .get_matches();
 
-    // let command: Box<dyn GuanCommand<Args = () >> =
-    if let Some(deploy) = matches.subcommand_matches("deploy") {
+    let command: Box<dyn GuanCommand> = if let Some(deploy) = matches.subcommand_matches("deploy") {
         let pipeline_file_path = deploy.value_of("pipeline_file_path").unwrap().to_string();
         let workdir = deploy.value_of("workdir").unwrap().to_string();
         let args = DeployArgs {
@@ -56,8 +55,7 @@ fn main() {
             workdir,
         };
 
-        // Box::new(DeployCommand::new(args))
-        DeployCommand::new(args).execute().unwrap();
+        Box::new(DeployCommand::new(args))
     } else if let Some(run_stage) = matches.subcommand_matches("run-stage") {
         let stage_name = run_stage.value_of("stage_name").unwrap().to_string();
         let pipeline_file_path = run_stage
@@ -72,17 +70,16 @@ fn main() {
             workdir,
         };
 
-        // Box::new(RunStageCommand::new(args))
-        RunStageCommand::new(args).execute().unwrap();
+        Box::new(RunStageCommand::new(args))
     } else if let Some(ls_stage) = matches.subcommand_matches("ls-stages") {
         let pipeline_file_path = ls_stage.value_of("pipeline_file_path").unwrap().to_string();
 
         let args = LsStagesArgs { pipeline_file_path };
 
-        LsStagesCommand::new(args).execute().unwrap();
+        Box::new(LsStagesCommand::new(args))
     } else {
         panic!("No subcommand selected");
     };
 
-    // command.execute().unwrap();
+    command.execute().unwrap();
 }

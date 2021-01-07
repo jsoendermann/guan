@@ -13,15 +13,15 @@ pub struct RunStageCommand {
   args: RunStageArgs,
 }
 
-impl GuanCommand for RunStageCommand {
-  type Args = RunStageArgs;
-
-  fn new(args: RunStageArgs) -> RunStageCommand {
+impl RunStageCommand {
+  pub fn new(args: RunStageArgs) -> RunStageCommand {
     RunStageCommand { args }
   }
+}
 
+impl GuanCommand for RunStageCommand {
   fn execute(&self) -> Result<(), Box<dyn Error>> {
-    let pipeline = Pipeline::from_file(&self.args.pipeline_file_path)?;
+    let pipeline = Pipeline::load_from_file(&self.args.pipeline_file_path)?;
 
     let stage = pipeline
       .stages

@@ -12,15 +12,15 @@ pub struct DeployCommand {
   args: DeployArgs,
 }
 
-impl GuanCommand for DeployCommand {
-  type Args = DeployArgs;
-
-  fn new(args: DeployArgs) -> DeployCommand {
+impl DeployCommand {
+  pub fn new(args: DeployArgs) -> DeployCommand {
     DeployCommand { args }
   }
+}
 
+impl GuanCommand for DeployCommand {
   fn execute(&self) -> Result<(), Box<dyn Error>> {
-    let pipeline = Pipeline::from_file(&self.args.pipeline_file_path)?;
+    let pipeline = Pipeline::load_from_file(&self.args.pipeline_file_path)?;
 
     for stage in pipeline.stages.iter() {
       println!("Running {}", stage.name);

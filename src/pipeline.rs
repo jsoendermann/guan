@@ -34,15 +34,49 @@ impl Stage {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Pipeline {
-  pub name: String,
+  pub project_name: Option<String>,
   pub stages: Vec<Stage>,
 }
 
 impl Pipeline {
-  pub fn from_file<P: AsRef<Path>>(path: P) -> Result<Pipeline, Box<dyn Error>> {
+  pub fn load_from_file<P: AsRef<Path>>(path: P) -> Result<Pipeline, Box<dyn Error>> {
     let file = File::open(path)?;
     let reader = BufReader::new(file);
     let p = serde_yaml::from_reader(reader)?;
     Ok(p)
   }
+
+  // pub fn run(&self) -> Result<(), Box<dyn Error>> {
+
+  // }
+
+  // pub fn execute(&self) -> Result<(), Box<dyn Error>> {
+  //   let completed_stages = vec![];
+  //   println!("{:?}", self.get_pending_stages(&completed_stages));
+  //   Ok(())
+  // }
+
+  // fn get_pending_stages(&self, completed_stages: &Vec<String>) -> &Vec<&str> {
+  //   let mut pending_stages = vec![];
+
+  //   for stage in self.stages.iter() {
+  //     if completed_stages.contains(&stage.id) {
+  //       continue;
+  //     }
+  //     let unfinished_dependencies = stage
+  //       .depends_on
+  //       .unwrap_or(vec![])
+  //       .iter()
+  //       .map(|s| s)
+  //       .filter(|dependency| !completed_stages.contains(dependency))
+  //       .collect::<Vec<&str>>();
+
+  //     if unfinished_dependencies.len() > 0 {
+  //       continue;
+  //     }
+  //     pending_stages.push(stage.id)
+  //   }
+
+  //   &pending_stages
+  // }
 }

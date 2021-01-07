@@ -13,15 +13,15 @@ pub struct LsStagesCommand {
   args: LsStagesArgs,
 }
 
-impl GuanCommand for LsStagesCommand {
-  type Args = LsStagesArgs;
-
-  fn new(args: LsStagesArgs) -> LsStagesCommand {
+impl LsStagesCommand {
+  pub fn new(args: LsStagesArgs) -> LsStagesCommand {
     LsStagesCommand { args }
   }
+}
 
+impl GuanCommand for LsStagesCommand {
   fn execute(&self) -> Result<(), Box<dyn Error>> {
-    let pipeline = Pipeline::from_file(&self.args.pipeline_file_path)
+    let pipeline = Pipeline::load_from_file(&self.args.pipeline_file_path)
       .expect("Can't open pipeline definition file");
 
     let mut stdout = StandardStream::stdout(ColorChoice::Auto);
